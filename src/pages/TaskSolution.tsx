@@ -5,58 +5,43 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { getTaskById, tasks } from '@/data/tasks';
 
-const sampleTask = {
-  id: 245,
-  subject: 'Математика',
-  grade: '8 класс',
-  chapter: 'Алгебра',
-  topic: 'Квадратные уравнения',
-  difficulty: 'Средняя',
-  views: 1523,
-  likes: 342,
-  question: 'Решите квадратное уравнение: x² - 5x + 6 = 0',
-  steps: [
-    {
-      id: 1,
-      title: 'Определим коэффициенты',
-      content: 'В уравнении x² - 5x + 6 = 0:\na = 1, b = -5, c = 6',
-      formula: 'ax² + bx + c = 0',
-    },
-    {
-      id: 2,
-      title: 'Вычислим дискриминант',
-      content: 'D = b² - 4ac\nD = (-5)² - 4·1·6 = 25 - 24 = 1',
-      formula: 'D = b² - 4ac',
-    },
-    {
-      id: 3,
-      title: 'Найдём корни уравнения',
-      content: 'x₁ = (-b + √D) / 2a = (5 + 1) / 2 = 3\nx₂ = (-b - √D) / 2a = (5 - 1) / 2 = 2',
-      formula: 'x₁,₂ = (-b ± √D) / 2a',
-    },
-    {
-      id: 4,
-      title: 'Проверка',
-      content: 'Подставим x₁ = 3: 3² - 5·3 + 6 = 9 - 15 + 6 = 0 ✓\nПодставим x₂ = 2: 2² - 5·2 + 6 = 4 - 10 + 6 = 0 ✓',
-      formula: '',
-    },
-  ],
-  answer: 'x₁ = 3, x₂ = 2',
-  explanation: 'Квадратное уравнение имеет два корня, так как дискриминант положителен (D > 0).',
-};
 
-const relatedTasks = [
-  { id: 246, title: 'Задача №246', subject: 'Математика', difficulty: 'Средняя' },
-  { id: 247, title: 'Задача №247', subject: 'Математика', difficulty: 'Сложная' },
-  { id: 248, title: 'Задача №248', subject: 'Математика', difficulty: 'Лёгкая' },
-];
 
 export default function TaskSolution() {
   const navigate = useNavigate();
+  const { id } = useParams();
   const [currentStep, setCurrentStep] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
+
+  const taskId = id ? parseInt(id) : 1;
+  const currentTask = getTaskById(taskId);
+  
+  if (!currentTask) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold mb-4">Задача не найдена</h1>
+          <Button onClick={() => navigate('/')}>
+            <Icon name="ArrowLeft" size={20} className="mr-2" />
+            На главную
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const relatedTasks = tasks
+    .filter(t => t.subject === currentTask.subject && t.id !== currentTask.id)
+    .slice(0, 3)
+    .map(t => ({
+      id: t.id,
+      title: `Задача №${t.id}`,
+      subject: t.subject,
+      difficulty: t.difficulty
+    }));
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -90,21 +75,21 @@ export default function TaskSolution() {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-3">
-                      <Badge variant="secondary">{sampleTask.subject}</Badge>
-                      <Badge variant="outline">{sampleTask.grade}</Badge>
-                      <Badge className={getDifficultyColor(sampleTask.difficulty)}>
-                        {sampleTask.difficulty}
+                      <Badge variant="secondary">{currentTask.subject}</Badge>
+                      <Badge variant="outline">{currentTask.grade}</Badge>
+                      <Badge className={getDifficultyColor(currentTask.difficulty)}>
+                        {currentTask.difficulty}
                       </Badge>
                     </div>
-                    <CardTitle className="text-3xl mb-2">Задача №{sampleTask.id}</CardTitle>
+                    <CardTitle className="text-3xl mb-2">Задача №{currentTask.id}</CardTitle>
                     <p className="text-muted-foreground">
-                      {sampleTask.chapter} → {sampleTask.topic}
+                      {currentTask.chapter} → {currentTask.topic}
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-2 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Icon name="Eye" size={16} />
-                      <span>{sampleTask.views}</span>
+                      <span>{currentTask.views}</span>
                     </div>
                     <Button
                       variant="ghost"
@@ -113,7 +98,7 @@ export default function TaskSolution() {
                       className={isLiked ? 'text-red-500' : ''}
                     >
                       <Icon name="Heart" size={16} className="mr-1" fill={isLiked ? 'currentColor' : 'none'} />
-                      {sampleTask.likes + (isLiked ? 1 : 0)}
+                      {currentTask.likes + (isLiked ? 1 : 0)}
                     </Button>
                   </div>
                 </div>
@@ -124,7 +109,7 @@ export default function TaskSolution() {
                     <Icon name="FileQuestion" size={20} className="text-primary" />
                     Условие задачи
                   </h3>
-                  <p className="text-lg">{sampleTask.question}</p>
+                  <p className="text-lg">{currentTask.question}</p>
                 </div>
 
                 <Tabs defaultValue="steps" className="w-full">
@@ -134,7 +119,7 @@ export default function TaskSolution() {
                   </TabsList>
                   
                   <TabsContent value="steps" className="space-y-4">
-                    {sampleTask.steps.map((step, index) => (
+                    {currentTask.steps.map((step, index) => (
                       <Card
                         key={step.id}
                         className={`transition-all duration-300 ${
@@ -174,12 +159,12 @@ export default function TaskSolution() {
                         Предыдущий шаг
                       </Button>
                       <span className="text-sm text-muted-foreground">
-                        Шаг {currentStep + 1} из {sampleTask.steps.length}
+                        Шаг {currentStep + 1} из {currentTask.steps.length}
                       </span>
                       <Button
                         variant="outline"
-                        disabled={currentStep === sampleTask.steps.length - 1}
-                        onClick={() => setCurrentStep(Math.min(sampleTask.steps.length - 1, currentStep + 1))}
+                        disabled={currentStep === currentTask.steps.length - 1}
+                        onClick={() => setCurrentStep(Math.min(currentTask.steps.length - 1, currentStep + 1))}
                       >
                         Следующий шаг
                         <Icon name="ChevronRight" size={20} className="ml-1" />
@@ -188,7 +173,7 @@ export default function TaskSolution() {
                   </TabsContent>
                   
                   <TabsContent value="full" className="space-y-4">
-                    {sampleTask.steps.map((step) => (
+                    {currentTask.steps.map((step) => (
                       <div key={step.id}>
                         <h4 className="font-semibold text-lg mb-2 flex items-center gap-2">
                           <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm">
@@ -216,8 +201,8 @@ export default function TaskSolution() {
                     <Icon name="CheckCircle" size={24} className="text-accent" />
                     Ответ
                   </h3>
-                  <p className="text-xl font-mono mb-3">{sampleTask.answer}</p>
-                  <p className="text-muted-foreground">{sampleTask.explanation}</p>
+                  <p className="text-xl font-mono mb-3">{currentTask.answer}</p>
+                  <p className="text-muted-foreground">{currentTask.explanation}</p>
                 </div>
               </CardContent>
             </Card>
@@ -236,7 +221,7 @@ export default function TaskSolution() {
                   <Card
                     key={task.id}
                     className="cursor-pointer hover:shadow-lg transition-all hover:border-primary border"
-                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    onClick={() => navigate(`/task/${task.id}`)}
                   >
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-2">

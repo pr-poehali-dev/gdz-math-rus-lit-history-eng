@@ -5,64 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
-
-const subjects = [
-  {
-    id: 1,
-    name: 'Математика',
-    icon: 'Calculator',
-    color: 'bg-gradient-to-br from-purple-500 to-purple-700',
-    tasks: 1247,
-    trending: true,
-  },
-  {
-    id: 2,
-    name: 'Русский язык',
-    icon: 'BookOpen',
-    color: 'bg-gradient-to-br from-blue-500 to-blue-700',
-    tasks: 892,
-    trending: false,
-  },
-  {
-    id: 3,
-    name: 'Литература',
-    icon: 'BookMarked',
-    color: 'bg-gradient-to-br from-orange-500 to-orange-700',
-    tasks: 654,
-    trending: true,
-  },
-  {
-    id: 4,
-    name: 'История',
-    icon: 'Scroll',
-    color: 'bg-gradient-to-br from-teal-500 to-teal-700',
-    tasks: 523,
-    trending: false,
-  },
-  {
-    id: 5,
-    name: 'Английский язык',
-    icon: 'Languages',
-    color: 'bg-gradient-to-br from-pink-500 to-pink-700',
-    tasks: 734,
-    trending: true,
-  },
-  {
-    id: 6,
-    name: 'ГДЗ',
-    icon: 'GraduationCap',
-    color: 'bg-gradient-to-br from-indigo-500 to-indigo-700',
-    tasks: 2156,
-    trending: true,
-  },
-];
-
-const popularTasks = [
-  { id: 1, subject: 'Математика', task: 'Задача №245', grade: '8 класс', views: 1523 },
-  { id: 2, subject: 'Русский язык', task: 'Упражнение №312', grade: '7 класс', views: 1204 },
-  { id: 3, subject: 'Английский язык', task: 'Unit 5, Ex. 7', grade: '9 класс', views: 987 },
-  { id: 4, subject: 'Литература', task: 'Анализ стихотворения', grade: '10 класс', views: 856 },
-];
+import { subjects } from '@/data/subjects';
+import { popularTasks } from '@/data/tasks';
 
 export default function Index() {
   const navigate = useNavigate();
