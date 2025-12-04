@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -64,6 +65,7 @@ const popularTasks = [
 ];
 
 export default function Index() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
 
@@ -194,7 +196,11 @@ export default function Index() {
                       <span className="text-sm">{task.views}</span>
                     </div>
                   </div>
-                  <Button className="w-full mt-4" variant="default">
+                  <Button 
+                    className="w-full mt-4" 
+                    variant="default"
+                    onClick={() => navigate(`/task/${task.id}`)}
+                  >
                     <Icon name="ArrowRight" size={16} className="mr-2" />
                     Посмотреть решение
                   </Button>
