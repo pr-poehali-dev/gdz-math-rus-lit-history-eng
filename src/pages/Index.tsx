@@ -243,7 +243,7 @@ export default function Index() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
           <Card className="hover:shadow-lg transition-all cursor-pointer border-2 hover:border-primary" onClick={() => navigate('/calculator')}>
             <CardHeader>
               <div className="flex items-center gap-4">
@@ -267,6 +267,20 @@ export default function Index() {
                 <div>
                   <CardTitle className="text-2xl">Видеоуроки</CardTitle>
                   <CardDescription>Обучающие видео по темам</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-all cursor-pointer border-2 hover:border-primary" onClick={() => navigate('/exam')}>
+            <CardHeader>
+              <div className="flex items-center gap-4">
+                <div className="bg-green-500 rounded-2xl p-4">
+                  <Icon name="GraduationCap" size={32} className="text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-2xl">ЕГЭ и ОГЭ</CardTitle>
+                  <CardDescription>Подготовка к экзаменам</CardDescription>
                 </div>
               </div>
             </CardHeader>

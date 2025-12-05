@@ -1,0 +1,16 @@
+{
+  "tests": [
+    {
+      "name": "Get all exam materials",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Get EGE materials",
+      "method": "GET",
+      "path": "/?type=ege",
+      "expectedStatus": 200
+    }
+  ]
+}
