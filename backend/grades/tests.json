@@ -1,0 +1,16 @@
+{
+  "tests": [
+    {
+      "name": "Get all grades",
+      "method": "GET",
+      "path": "/?resource=grades",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Get all subjects",
+      "method": "GET",
+      "path": "/?resource=subjects",
+      "expectedStatus": 200
+    }
+  ]
+}

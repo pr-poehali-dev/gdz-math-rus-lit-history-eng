@@ -1,0 +1,40 @@
+{
+  "tests": [
+    {
+      "name": "Get all tasks",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "tasks": []
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Create new task",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "create",
+        "grade_id": 1,
+        "subject_id": 1,
+        "page_number": 10,
+        "task_number": "5",
+        "difficulty": "easy",
+        "question": "2+2=?",
+        "answer": "4",
+        "explanation": "Сложение двух чисел",
+        "user_id": 1
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true,
+        "task": {
+          "question": "string",
+          "answer": "string"
+        }
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

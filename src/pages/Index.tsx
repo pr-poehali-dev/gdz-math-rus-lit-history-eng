@@ -1,18 +1,55 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
-import { subjects } from '@/data/subjects';
-import { popularTasks } from '@/data/tasks';
+
+interface Grade {
+  id: number;
+  grade_number: number;
+  name: string;
+  description: string;
+}
+
+interface Subject {
+  id: number;
+  name: string;
+  icon: string;
+  color: string;
+}
 
 export default function Index() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
+  const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
+  const [selectedSubject, setSelectedSubject] = useState<number | null>(null);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
   const [isListening, setIsListening] = useState(false);
+  const [grades, setGrades] = useState<Grade[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const gradesRes = await fetch('https://functions.poehali.dev/1c946bd1-e639-4d28-a547-ab3c32f5f380/?resource=grades');
+        const gradesData = await gradesRes.json();
+        setGrades(gradesData.grades || []);
+
+        const subjectsRes = await fetch('https://functions.poehali.dev/1c946bd1-e639-4d28-a547-ab3c32f5f380/?resource=subjects');
+        const subjectsData = await subjectsRes.json();
+        setSubjects(subjectsData.subjects || []);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleVoiceSearch = () => {
     if (!('webkitSpeechRecognition' in window)) {
@@ -46,9 +83,23 @@ export default function Index() {
     recognition.start();
   };
 
-  const filteredSubjects = subjects.filter((subject) =>
-    subject.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+    if (selectedGrade) params.append('grade', selectedGrade.toString());
+    if (selectedSubject) params.append('subject', selectedSubject.toString());
+    if (selectedDifficulty) params.append('difficulty', selectedDifficulty);
+    if (searchQuery) params.append('q', searchQuery);
+    
+    navigate(`/task/search?${params.toString()}`);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background via-muted/30 to-background flex items-center justify-center">
+        <Icon name="Loader2" size={48} className="animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-muted/30 to-background">
@@ -58,7 +109,7 @@ export default function Index() {
             ГДЗ Платформа
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground mb-8">
-            Быстрый поиск решений по всем школьным предметам
+            Решения задач для 1-4 классов с видеоуроками и калькулятором
           </p>
           
           <div className="max-w-2xl mx-auto relative animate-slide-up">
@@ -70,6 +121,7 @@ export default function Index() {
                   placeholder="Найти задачу по номеру, странице или теме..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                   className="pl-12 pr-4 py-6 text-lg rounded-2xl border-2 focus:border-primary transition-all shadow-lg"
                 />
               </div>
@@ -81,49 +133,21 @@ export default function Index() {
               >
                 <Icon name={isListening ? 'MicOff' : 'Mic'} size={20} />
               </Button>
+              <Button
+                size="lg"
+                onClick={handleSearch}
+                className="px-6 py-6 rounded-2xl"
+              >
+                <Icon name="Search" size={20} />
+              </Button>
             </div>
-            {searchQuery && (
-              <div className="absolute w-full mt-2 bg-card rounded-2xl shadow-2xl border-2 border-border p-4 animate-scale-in z-10">
-                <p className="text-sm text-muted-foreground mb-2">Результаты поиска:</p>
-                <div className="space-y-2">
-                  {filteredSubjects.length > 0 ? (
-                    filteredSubjects.map((subject) => (
-                      <Button
-                        key={subject.id}
-                        variant="ghost"
-                        className="w-full justify-start text-left hover:bg-accent/20 transition-all"
-                        onClick={() => {
-                          setSelectedSubject(subject.name);
-                          setSearchQuery('');
-                        }}
-                      >
-                        <Icon name={subject.icon as any} size={18} className="mr-2" />
-                        {subject.name} - {subject.tasks} задач
-                      </Button>
-                    ))
-                  ) : (
-                    <p className="text-sm text-muted-foreground py-2">Ничего не найдено</p>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
         <div className="mb-16">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-3xl font-bold">Все предметы</h2>
+            <h2 className="text-3xl font-bold">Выберите класс</h2>
             <div className="flex gap-2">
-              {selectedSubject && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSelectedSubject(null)}
-                >
-                  <Icon name="X" size={16} className="mr-1" />
-                  Сбросить фильтр
-                </Button>
-              )}
               <Button
                 variant="outline"
                 size="sm"
@@ -135,90 +159,118 @@ export default function Index() {
             </div>
           </div>
           
-          <div className="mb-6 flex gap-2 flex-wrap">
-            <Badge variant="outline" className="cursor-pointer hover:bg-accent py-2 px-4">Лёгкие</Badge>
-            <Badge variant="outline" className="cursor-pointer hover:bg-accent py-2 px-4">Средние</Badge>
-            <Badge variant="outline" className="cursor-pointer hover:bg-accent py-2 px-4">Сложные</Badge>
-            <div className="h-6 w-px bg-border mx-2" />
-            <Badge variant="outline" className="cursor-pointer hover:bg-accent py-2 px-4">5 класс</Badge>
-            <Badge variant="outline" className="cursor-pointer hover:bg-accent py-2 px-4">6 класс</Badge>
-            <Badge variant="outline" className="cursor-pointer hover:bg-accent py-2 px-4">7 класс</Badge>
-            <Badge variant="outline" className="cursor-pointer hover:bg-accent py-2 px-4">8 класс</Badge>
-            <Badge variant="outline" className="cursor-pointer hover:bg-accent py-2 px-4">9 класс</Badge>
-            <Badge variant="outline" className="cursor-pointer hover:bg-accent py-2 px-4">10 класс</Badge>
-            <Badge variant="outline" className="cursor-pointer hover:bg-accent py-2 px-4">11 класс</Badge>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {subjects
-              .filter((subject) => !selectedSubject || subject.name === selectedSubject)
-              .map((subject, index) => (
-                <Card
-                  key={subject.id}
-                  className="group cursor-pointer hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 animate-slide-up border-2 hover:border-primary overflow-hidden"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                  onClick={() => setSelectedSubject(subject.name)}
-                >
-                  <CardHeader className="relative pb-0">
-                    <div className={`${subject.color} rounded-2xl p-6 mb-4 flex items-center justify-center transition-transform group-hover:scale-110`}>
-                      <Icon name={subject.icon as any} size={48} className="text-white" />
-                    </div>
-                    {subject.trending && (
-                      <Badge className="absolute top-4 right-4 bg-accent text-accent-foreground">
-                        🔥 Популярно
-                      </Badge>
-                    )}
-                  </CardHeader>
-                  <CardContent>
-                    <CardTitle className="text-2xl mb-2">{subject.name}</CardTitle>
-                    <CardDescription className="text-base">
-                      <div className="flex items-center gap-2">
-                        <Icon name="FileText" size={16} />
-                        <span>{subject.tasks} решений доступно</span>
-                      </div>
-                    </CardDescription>
-                  </CardContent>
-                </Card>
-              ))}
-          </div>
-        </div>
-
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold mb-6 flex items-center gap-2">
-            <Icon name="TrendingUp" size={32} className="text-primary" />
-            Популярные задачи
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {popularTasks.map((task, index) => (
-              <Card
-                key={task.id}
-                className="hover:shadow-lg transition-all duration-300 cursor-pointer hover:border-primary border-2 animate-fade-in"
-                style={{ animationDelay: `${index * 100}ms` }}
+          <div className="mb-8 flex gap-3 flex-wrap">
+            {grades.map((grade) => (
+              <Badge
+                key={grade.id}
+                variant={selectedGrade === grade.id ? 'default' : 'outline'}
+                className="cursor-pointer hover:bg-accent py-3 px-6 text-base transition-all"
+                onClick={() => setSelectedGrade(selectedGrade === grade.id ? null : grade.id)}
               >
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <Badge variant="secondary" className="mb-2">{task.subject}</Badge>
-                      <h3 className="text-xl font-semibold">{task.task}</h3>
-                      <p className="text-sm text-muted-foreground">{task.grade}</p>
-                    </div>
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <Icon name="Eye" size={16} />
-                      <span className="text-sm">{task.views}</span>
-                    </div>
+                {grade.name}
+              </Badge>
+            ))}
+          </div>
+
+          <h3 className="text-2xl font-bold mb-4">Выберите предмет</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {subjects.map((subject, index) => (
+              <Card
+                key={subject.id}
+                className={`group cursor-pointer hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 animate-slide-up border-2 overflow-hidden ${
+                  selectedSubject === subject.id ? 'border-primary ring-2 ring-primary' : 'hover:border-primary'
+                }`}
+                style={{ animationDelay: `${index * 100}ms` }}
+                onClick={() => setSelectedSubject(selectedSubject === subject.id ? null : subject.id)}
+              >
+                <CardHeader className="relative pb-0">
+                  <div className={`bg-${subject.color}-500 rounded-2xl p-6 mb-4 flex items-center justify-center transition-transform group-hover:scale-110`}>
+                    <Icon name={subject.icon as any} size={48} className="text-white" />
                   </div>
-                  <Button 
-                    className="w-full mt-4" 
-                    variant="default"
-                    onClick={() => navigate(`/task/${task.id}`)}
-                  >
-                    <Icon name="ArrowRight" size={16} className="mr-2" />
-                    Посмотреть решение
-                  </Button>
+                </CardHeader>
+                <CardContent>
+                  <CardTitle className="text-xl text-center">{subject.name}</CardTitle>
                 </CardContent>
               </Card>
             ))}
           </div>
+
+          <h3 className="text-2xl font-bold mb-4">Уровень сложности</h3>
+          <div className="mb-6 flex gap-3 flex-wrap">
+            <Badge
+              variant={selectedDifficulty === 'easy' ? 'default' : 'outline'}
+              className="cursor-pointer hover:bg-accent py-3 px-6 text-base"
+              onClick={() => setSelectedDifficulty(selectedDifficulty === 'easy' ? null : 'easy')}
+            >
+              Лёгкие
+            </Badge>
+            <Badge
+              variant={selectedDifficulty === 'medium' ? 'default' : 'outline'}
+              className="cursor-pointer hover:bg-accent py-3 px-6 text-base"
+              onClick={() => setSelectedDifficulty(selectedDifficulty === 'medium' ? null : 'medium')}
+            >
+              Средние
+            </Badge>
+            <Badge
+              variant={selectedDifficulty === 'hard' ? 'default' : 'outline'}
+              className="cursor-pointer hover:bg-accent py-3 px-6 text-base"
+              onClick={() => setSelectedDifficulty(selectedDifficulty === 'hard' ? null : 'hard')}
+            >
+              Сложные
+            </Badge>
+          </div>
+
+          {(selectedGrade || selectedSubject || selectedDifficulty || searchQuery) && (
+            <div className="flex gap-2 items-center">
+              <Button onClick={handleSearch} size="lg" className="text-lg">
+                <Icon name="Search" size={20} className="mr-2" />
+                Найти задачи
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => {
+                  setSelectedGrade(null);
+                  setSelectedSubject(null);
+                  setSelectedDifficulty(null);
+                  setSearchQuery('');
+                }}
+              >
+                <Icon name="X" size={16} className="mr-1" />
+                Сбросить фильтры
+              </Button>
+            </div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+          <Card className="hover:shadow-lg transition-all cursor-pointer border-2 hover:border-primary" onClick={() => navigate('/calculator')}>
+            <CardHeader>
+              <div className="flex items-center gap-4">
+                <div className="bg-blue-500 rounded-2xl p-4">
+                  <Icon name="Calculator" size={32} className="text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-2xl">Калькулятор</CardTitle>
+                  <CardDescription>Решение примеров с объяснением</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-all cursor-pointer border-2 hover:border-primary" onClick={() => navigate('/videos')}>
+            <CardHeader>
+              <div className="flex items-center gap-4">
+                <div className="bg-purple-500 rounded-2xl p-4">
+                  <Icon name="Video" size={32} className="text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-2xl">Видеоуроки</CardTitle>
+                  <CardDescription>Обучающие видео по темам</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
         </div>
 
         <div className="text-center bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 rounded-3xl p-12 border-2 border-primary/20 mb-8">
@@ -236,7 +288,7 @@ export default function Index() {
         <div className="text-center">
           <Button variant="outline" onClick={() => navigate('/reviews')}>
             <Icon name="MessageCircle" size={20} className="mr-2" />
-            Читать отзывы (1247)
+            Читать отзывы
           </Button>
         </div>
       </div>

@@ -1,0 +1,37 @@
+{
+  "tests": [
+    {
+      "name": "Get all videos",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "videos": []
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Create new video",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "create",
+        "grade_id": 1,
+        "subject_id": 1,
+        "title": "Как складывать числа",
+        "description": "Обучающее видео",
+        "video_url": "https://youtube.com/watch?v=example",
+        "duration": 300
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true,
+        "video": {
+          "title": "string",
+          "video_url": "string"
+        }
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
