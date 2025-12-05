@@ -13,6 +13,7 @@ import TeacherPanel from "./pages/TeacherPanel";
 import Calculator from "./pages/Calculator";
 import Videos from "./pages/Videos";
 import ExamPrep from "./pages/ExamPrep";
+import Library from "./pages/Library";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
           <Route path="/calculator" element={<Calculator />} />
           <Route path="/videos" element={<Videos />} />
           <Route path="/exam" element={<ExamPrep />} />
+          <Route path="/library" element={<Library />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
