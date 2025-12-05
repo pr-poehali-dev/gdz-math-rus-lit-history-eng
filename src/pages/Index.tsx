@@ -12,6 +12,39 @@ export default function Index() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
+  const [isListening, setIsListening] = useState(false);
+
+  const handleVoiceSearch = () => {
+    if (!('webkitSpeechRecognition' in window)) {
+      alert('Голосовой поиск не поддерживается вашим браузером');
+      return;
+    }
+
+    const recognition = new (window as any).webkitSpeechRecognition();
+    recognition.lang = 'ru-RU';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setSearchQuery(transcript);
+      setIsListening(false);
+    };
+
+    recognition.onerror = () => {
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
 
   const filteredSubjects = subjects.filter((subject) =>
     subject.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -29,15 +62,25 @@ export default function Index() {
           </p>
           
           <div className="max-w-2xl mx-auto relative animate-slide-up">
-            <div className="relative">
-              <Icon name="Search" className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
-              <Input
-                type="text"
-                placeholder="Найти задачу по номеру или теме..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 pr-4 py-6 text-lg rounded-2xl border-2 focus:border-primary transition-all shadow-lg"
-              />
+            <div className="relative flex gap-2">
+              <div className="relative flex-1">
+                <Icon name="Search" className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
+                <Input
+                  type="text"
+                  placeholder="Найти задачу по номеру, странице или теме..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-12 pr-4 py-6 text-lg rounded-2xl border-2 focus:border-primary transition-all shadow-lg"
+                />
+              </div>
+              <Button
+                size="lg"
+                onClick={handleVoiceSearch}
+                className={`px-6 py-6 rounded-2xl ${isListening ? 'bg-red-500 hover:bg-red-600' : ''}`}
+                title="Голосовой поиск"
+              >
+                <Icon name={isListening ? 'MicOff' : 'Mic'} size={20} />
+              </Button>
             </div>
             {searchQuery && (
               <div className="absolute w-full mt-2 bg-card rounded-2xl shadow-2xl border-2 border-border p-4 animate-scale-in z-10">
@@ -70,16 +113,40 @@ export default function Index() {
         <div className="mb-16">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-3xl font-bold">Все предметы</h2>
-            {selectedSubject && (
+            <div className="flex gap-2">
+              {selectedSubject && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedSubject(null)}
+                >
+                  <Icon name="X" size={16} className="mr-1" />
+                  Сбросить фильтр
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setSelectedSubject(null)}
+                onClick={() => navigate('/auth')}
               >
-                <Icon name="X" size={16} className="mr-1" />
-                Сбросить фильтр
+                <Icon name="User" size={16} className="mr-1" />
+                Войти
               </Button>
-            )}
+            </div>
+          </div>
+          
+          <div className="mb-6 flex gap-2 flex-wrap">
+            <Badge variant="outline" className="cursor-pointer hover:bg-accent py-2 px-4">Лёгкие</Badge>
+            <Badge variant="outline" className="cursor-pointer hover:bg-accent py-2 px-4">Средние</Badge>
+            <Badge variant="outline" className="cursor-pointer hover:bg-accent py-2 px-4">Сложные</Badge>
+            <div className="h-6 w-px bg-border mx-2" />
+            <Badge variant="outline" className="cursor-pointer hover:bg-accent py-2 px-4">5 класс</Badge>
+            <Badge variant="outline" className="cursor-pointer hover:bg-accent py-2 px-4">6 класс</Badge>
+            <Badge variant="outline" className="cursor-pointer hover:bg-accent py-2 px-4">7 класс</Badge>
+            <Badge variant="outline" className="cursor-pointer hover:bg-accent py-2 px-4">8 класс</Badge>
+            <Badge variant="outline" className="cursor-pointer hover:bg-accent py-2 px-4">9 класс</Badge>
+            <Badge variant="outline" className="cursor-pointer hover:bg-accent py-2 px-4">10 класс</Badge>
+            <Badge variant="outline" className="cursor-pointer hover:bg-accent py-2 px-4">11 класс</Badge>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -154,7 +221,7 @@ export default function Index() {
           </div>
         </div>
 
-        <div className="text-center bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 rounded-3xl p-12 border-2 border-primary/20">
+        <div className="text-center bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 rounded-3xl p-12 border-2 border-primary/20 mb-8">
           <Icon name="Sparkles" size={48} className="mx-auto mb-4 text-primary" />
           <h2 className="text-3xl font-bold mb-4">Не нашли нужное решение?</h2>
           <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
@@ -163,6 +230,13 @@ export default function Index() {
           <Button size="lg" className="text-lg px-8 py-6">
             <Icon name="Send" size={20} className="mr-2" />
             Отправить запрос
+          </Button>
+        </div>
+
+        <div className="text-center">
+          <Button variant="outline" onClick={() => navigate('/reviews')}>
+            <Icon name="MessageCircle" size={20} className="mr-2" />
+            Читать отзывы (1247)
           </Button>
         </div>
       </div>
