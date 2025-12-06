@@ -34,6 +34,8 @@ interface TextbookSolution {
   author: string;
   grade_name: string;
   subject_name: string;
+  avg_rating?: number;
+  rating_count?: number;
 }
 
 export default function Index() {
@@ -334,6 +336,13 @@ export default function Index() {
                         <CardDescription className="text-sm">
                           <div className="font-semibold mb-1">{solution.textbook_title}</div>
                           <div className="text-xs">{solution.author}</div>
+                          {solution.avg_rating && (
+                            <div className="flex items-center gap-1 mt-2 text-amber-600">
+                              <Icon name="Star" size={14} className="fill-amber-500" />
+                              <span className="font-semibold">{solution.avg_rating.toFixed(1)}</span>
+                              <span className="text-xs text-muted-foreground">({solution.rating_count})</span>
+                            </div>
+                          )}
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
@@ -363,7 +372,7 @@ export default function Index() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-16">
           <Card className="hover:shadow-lg transition-all cursor-pointer border-2 hover:border-primary" onClick={() => navigate('/calculator')}>
             <CardHeader>
               <div className="flex items-center gap-4">
@@ -413,8 +422,22 @@ export default function Index() {
                   <Icon name="Library" size={32} className="text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl">Библиотека</CardTitle>
-                  <CardDescription>Учебники с решениями</CardDescription>
+                  <CardTitle className="text-2xl">Учебники</CardTitle>
+                  <CardDescription>Библиотека с решениями</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-all cursor-pointer border-2 hover:border-primary" onClick={() => navigate('/puzzles')}>
+            <CardHeader>
+              <div className="flex items-center gap-4">
+                <div className="bg-pink-500 rounded-2xl p-4">
+                  <Icon name="Puzzle" size={32} className="text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-2xl">Ребусы</CardTitle>
+                  <CardDescription>Логические задачи</CardDescription>
                 </div>
               </div>
             </CardHeader>

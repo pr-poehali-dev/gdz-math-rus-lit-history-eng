@@ -52,6 +52,36 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'isBase64Encoded': False
             }
         
+        elif resource == 'puzzles':
+            grade_id = params.get('grade_id')
+            difficulty = params.get('difficulty')
+            
+            query = """
+                SELECT p.*, g.name as grade_name
+                FROM puzzles p
+                LEFT JOIN grades g ON p.grade_id = g.id
+                WHERE 1=1
+            """
+            
+            if grade_id:
+                query += f" AND p.grade_id = {int(grade_id)}"
+            if difficulty:
+                query += f" AND p.difficulty = '{difficulty}'"
+            
+            query += " ORDER BY p.difficulty, p.grade_id"
+            
+            cursor.execute(query)
+            puzzles = cursor.fetchall()
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({
+                    'puzzles': [dict(p) for p in puzzles]
+                }, ensure_ascii=False),
+                'isBase64Encoded': False
+            }
+        
         elif resource == 'subjects':
             cursor.execute("SELECT * FROM subjects WHERE id NOT IN (21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37) ORDER BY name")
             subjects = cursor.fetchall()
@@ -72,11 +102,18 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             user_email = params.get('user_email')
             
             query = """
-                SELECT ts.*, t.title as textbook_title, t.author, g.name as grade_name, s.name as subject_name
+                SELECT ts.*, 
+                       t.title as textbook_title, 
+                       t.author, 
+                       g.name as grade_name, 
+                       s.name as subject_name,
+                       AVG(r.rating) as avg_rating,
+                       COUNT(r.id) as rating_count
                 FROM textbook_solutions ts
                 LEFT JOIN textbooks t ON ts.textbook_id = t.id
                 LEFT JOIN grades g ON ts.grade_id = g.id
                 LEFT JOIN subjects s ON ts.subject_id = s.id
+                LEFT JOIN ratings r ON ts.id = r.solution_id
                 WHERE 1=1
             """
             
@@ -108,7 +145,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             if textbook_id:
                 query += f" AND ts.textbook_id = {int(textbook_id)}"
             
-            query += " ORDER BY ts.page_number, ts.task_number"
+            query += " GROUP BY ts.id, t.title, t.author, g.name, s.name ORDER BY ts.page_number, ts.task_number"
             
             cursor.execute(query)
             solutions = cursor.fetchall()

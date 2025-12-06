@@ -16,6 +16,7 @@ import ExamPrep from "./pages/ExamPrep";
 import Library from "./pages/Library";
 import TextbookView from "./pages/TextbookView";
 import Donate from "./pages/Donate";
+import Puzzles from "./pages/Puzzles";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App = () => (
           <Route path="/library" element={<Library />} />
           <Route path="/library/:id" element={<TextbookView />} />
           <Route path="/donate" element={<Donate />} />
+          <Route path="/puzzles" element={<Puzzles />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
