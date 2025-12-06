@@ -84,9 +84,20 @@ export default function Index() {
       if (selectedGrade) params.append('grade_id', selectedGrade.toString());
       if (selectedSubject) params.append('subject_id', selectedSubject.toString());
       
+      const userEmail = localStorage.getItem('user_email') || '';
+      if (userEmail) params.append('user_email', userEmail);
+      
       const res = await fetch(`https://functions.poehali.dev/1c946bd1-e639-4d28-a547-ab3c32f5f380/?resource=textbook_solutions&${params.toString()}`);
       const data = await res.json();
-      setTextbookSolutions(data.solutions || []);
+      
+      if (res.status === 403 && data.error === 'premium_required') {
+        if (confirm(data.message + '\n\nПерейти на страницу оплаты?')) {
+          navigate('/donate');
+        }
+        setTextbookSolutions([]);
+      } else {
+        setTextbookSolutions(data.solutions || []);
+      }
     } catch (error) {
       console.error('Error loading solutions:', error);
     } finally {
@@ -403,7 +414,7 @@ export default function Index() {
                 </div>
                 <div>
                   <CardTitle className="text-2xl">Библиотека</CardTitle>
-                  <CardDescription>Учебники 2015-2025</CardDescription>
+                  <CardDescription>Учебники с решениями</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -422,10 +433,14 @@ export default function Index() {
           </Button>
         </div>
 
-        <div className="text-center">
+        <div className="text-center flex gap-4 justify-center">
           <Button variant="outline" onClick={() => navigate('/reviews')}>
             <Icon name="MessageCircle" size={20} className="mr-2" />
             Читать отзывы
+          </Button>
+          <Button onClick={() => navigate('/donate')} className="bg-gradient-to-r from-purple-600 to-pink-600">
+            <Icon name="Heart" size={20} className="mr-2" />
+            Поддержать проект
           </Button>
         </div>
       </div>

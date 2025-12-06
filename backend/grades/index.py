@@ -69,6 +69,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             grade_id = params.get('grade_id')
             subject_id = params.get('subject_id')
             textbook_id = params.get('textbook_id')
+            user_email = params.get('user_email')
             
             query = """
                 SELECT ts.*, t.title as textbook_title, t.author, g.name as grade_name, s.name as subject_name
@@ -82,7 +83,28 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             if grade_id:
                 query += f" AND ts.grade_id = {int(grade_id)}"
             if subject_id:
-                query += f" AND ts.subject_id = {int(subject_id)}"
+                subject_id_int = int(subject_id)
+                if subject_id_int == 38:
+                    has_access = False
+                    if user_email:
+                        check_query = f"SELECT COUNT(*) as cnt FROM purchases WHERE email = '{user_email}' AND product_type = 'german_forever' AND status = 'paid'"
+                        cursor.execute(check_query)
+                        result = cursor.fetchone()
+                        has_access = result['cnt'] > 0
+                    
+                    if not has_access:
+                        return {
+                            'statusCode': 403,
+                            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                            'body': json.dumps({
+                                'error': 'premium_required',
+                                'message': 'Для доступа к немецкому языку нужна подписка за 190₽',
+                                'redirect': '/donate'
+                            }, ensure_ascii=False),
+                            'isBase64Encoded': False
+                        }
+                
+                query += f" AND ts.subject_id = {subject_id_int}"
             if textbook_id:
                 query += f" AND ts.textbook_id = {int(textbook_id)}"
             

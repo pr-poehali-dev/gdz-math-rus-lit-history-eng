@@ -228,9 +228,16 @@ export default function Library() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex gap-2">
-                    <Button className="flex-1" size="sm" onClick={() => navigate(`/library/${textbook.id}`)}>
+                    <Button 
+                      className="flex-1" 
+                      size="sm" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/library/${textbook.id}`);
+                      }}
+                    >
                       <Icon name="BookOpen" size={14} className="mr-1" />
-                      Открыть
+                      Решения
                     </Button>
                     {textbook.pdf_url && (
                       <Button 
@@ -240,6 +247,7 @@ export default function Library() {
                           e.stopPropagation();
                           window.open(textbook.pdf_url, '_blank');
                         }}
+                        title="Скачать PDF"
                       >
                         <Icon name="Download" size={14} />
                       </Button>

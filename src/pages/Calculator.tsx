@@ -5,11 +5,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
 
+interface Step {
+  text: string;
+  value?: string;
+}
+
 export default function Calculator() {
   const navigate = useNavigate();
   const [display, setDisplay] = useState('0');
   const [equation, setEquation] = useState('');
   const [result, setResult] = useState<number | null>(null);
+  const [steps, setSteps] = useState<Step[]>([]);
 
   const handleNumber = (num: string) => {
     if (display === '0') {
@@ -27,12 +33,67 @@ export default function Calculator() {
   const handleEqual = () => {
     try {
       const fullEquation = equation + display;
-      const calculated = eval(fullEquation.replace('×', '*').replace('÷', '/'));
-      setResult(calculated);
-      setDisplay(calculated.toString());
-      setEquation('');
+      const parts = fullEquation.split(' ');
+      
+      if (parts.length === 3) {
+        const num1 = parseFloat(parts[0]);
+        const operator = parts[1];
+        const num2 = parseFloat(parts[2]);
+        
+        const calculationSteps: Step[] = [];
+        let calculated = 0;
+        
+        calculationSteps.push({ text: `Дано выражение: ${num1} ${operator} ${num2}` });
+        
+        switch(operator) {
+          case '+':
+            calculated = num1 + num2;
+            calculationSteps.push({ text: 'Складываем числа:', value: `${num1} + ${num2}` });
+            calculationSteps.push({ text: 'Получаем результат:', value: calculated.toString() });
+            break;
+          case '-':
+            calculated = num1 - num2;
+            calculationSteps.push({ text: 'Вычитаем из первого числа второе:', value: `${num1} - ${num2}` });
+            calculationSteps.push({ text: 'Получаем результат:', value: calculated.toString() });
+            break;
+          case '×':
+            calculated = num1 * num2;
+            calculationSteps.push({ text: 'Умножаем числа:', value: `${num1} × ${num2}` });
+            if (Number.isInteger(num1) && Number.isInteger(num2) && num2 <= 10) {
+              calculationSteps.push({ text: `Это можно решить через таблицу умножения` });
+            }
+            calculationSteps.push({ text: 'Получаем результат:', value: calculated.toString() });
+            break;
+          case '÷':
+            if (num2 === 0) {
+              setDisplay('Ошибка: деление на 0');
+              return;
+            }
+            calculated = num1 / num2;
+            calculationSteps.push({ text: 'Делим первое число на второе:', value: `${num1} ÷ ${num2}` });
+            if (Number.isInteger(calculated)) {
+              calculationSteps.push({ text: 'Деление без остатка' });
+            } else {
+              calculationSteps.push({ text: 'Результат с остатком или десятичная дробь' });
+            }
+            calculationSteps.push({ text: 'Получаем результат:', value: calculated.toString() });
+            break;
+        }
+        
+        setSteps(calculationSteps);
+        setResult(calculated);
+        setDisplay(calculated.toString());
+        setEquation('');
+      } else {
+        const calculated = eval(fullEquation.replace(/×/g, '*').replace(/÷/g, '/'));
+        setResult(calculated);
+        setDisplay(calculated.toString());
+        setEquation('');
+        setSteps([{ text: 'Сложное выражение вычислено', value: calculated.toString() }]);
+      }
     } catch (error) {
       setDisplay('Ошибка');
+      setSteps([]);
     }
   };
 
@@ -40,6 +101,7 @@ export default function Calculator() {
     setDisplay('0');
     setEquation('');
     setResult(null);
+    setSteps([]);
   };
 
   const buttons = [
@@ -116,28 +178,35 @@ export default function Calculator() {
               <CardDescription>Пошаговое решение примера</CardDescription>
             </CardHeader>
             <CardContent>
-              {result !== null ? (
+              {result !== null && steps.length > 0 ? (
                 <div className="space-y-4">
-                  <div className="bg-primary/10 rounded-lg p-4">
-                    <h3 className="font-semibold mb-2 flex items-center gap-2">
+                  <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
+                    <h3 className="font-semibold mb-2 flex items-center gap-2 text-green-700">
                       <Icon name="Check" size={20} className="text-green-600" />
                       Ответ: {result}
                     </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Результат вычисления сохранён
-                    </p>
                   </div>
 
-                  <div className="border rounded-lg p-4">
-                    <h4 className="font-semibold mb-2 flex items-center gap-2">
-                      <Icon name="Lightbulb" size={18} />
-                      Как решать:
+                  <div className="border-2 border-primary rounded-lg p-4 bg-blue-50">
+                    <h4 className="font-semibold mb-3 flex items-center gap-2 text-primary">
+                      <Icon name="ListOrdered" size={20} />
+                      Пошаговое решение:
                     </h4>
-                    <ol className="text-sm space-y-2 list-decimal list-inside text-muted-foreground">
-                      <li>Выполняем действия по порядку</li>
-                      <li>Следим за знаками операций</li>
-                      <li>Проверяем правильность результата</li>
-                    </ol>
+                    <div className="space-y-3">
+                      {steps.map((step, index) => (
+                        <div key={index} className="flex items-start gap-3">
+                          <div className="bg-primary text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold flex-shrink-0">
+                            {index + 1}
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">{step.text}</p>
+                            {step.value && (
+                              <p className="text-lg font-bold text-primary mt-1">{step.value}</p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   <div className="border border-blue-500 rounded-lg p-4 bg-blue-50">

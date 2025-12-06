@@ -14,6 +14,8 @@ import Calculator from "./pages/Calculator";
 import Videos from "./pages/Videos";
 import ExamPrep from "./pages/ExamPrep";
 import Library from "./pages/Library";
+import TextbookView from "./pages/TextbookView";
+import Donate from "./pages/Donate";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +37,8 @@ const App = () => (
           <Route path="/videos" element={<Videos />} />
           <Route path="/exam" element={<ExamPrep />} />
           <Route path="/library" element={<Library />} />
+          <Route path="/library/:id" element={<TextbookView />} />
+          <Route path="/donate" element={<Donate />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
