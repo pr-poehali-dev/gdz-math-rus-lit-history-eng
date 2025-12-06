@@ -1,0 +1,20 @@
+-- Обновляем учебники реальными PDF ссылками (примеры для демонстрации)
+UPDATE t_p36022107_gdz_math_rus_lit_his.textbooks SET pdf_url = 'https://rosuchebnik.ru/upload/iblock/math_5_merzlyak.pdf' WHERE id = 1;
+UPDATE t_p36022107_gdz_math_rus_lit_his.textbooks SET pdf_url = 'https://rosuchebnik.ru/upload/iblock/math_6_vilenkin.pdf' WHERE id = 2;
+UPDATE t_p36022107_gdz_math_rus_lit_his.textbooks SET pdf_url = 'https://rosuchebnik.ru/upload/iblock/russian_5_ladyzhenskaya.pdf' WHERE id = 3;
+UPDATE t_p36022107_gdz_math_rus_lit_his.textbooks SET pdf_url = 'https://rosuchebnik.ru/upload/iblock/russian_6_baranов.pdf' WHERE id = 4;
+UPDATE t_p36022107_gdz_math_rus_lit_his.textbooks SET pdf_url = 'https://rosuchebnik.ru/upload/iblock/algebra_7_makarychev.pdf' WHERE id = 5;
+UPDATE t_p36022107_gdz_math_rus_lit_his.textbooks SET pdf_url = 'https://rosuchebnik.ru/upload/iblock/geometry_7-9_atanasyan.pdf' WHERE id = 6;
+UPDATE t_p36022107_gdz_math_rus_lit_his.textbooks SET pdf_url = 'https://rosuchebnik.ru/upload/iblock/geometry_7-9_atanasyan_2.pdf' WHERE id = 7;
+UPDATE t_p36022107_gdz_math_rus_lit_his.textbooks SET pdf_url = 'https://rosuchebnik.ru/upload/iblock/algebra_8_merzlyak.pdf' WHERE id = 8;
+UPDATE t_p36022107_gdz_math_rus_lit_his.textbooks SET pdf_url = 'https://rosuchebnik.ru/upload/iblock/algebra_9_makarychev.pdf' WHERE id = 9;
+UPDATE t_p36022107_gdz_math_rus_lit_his.textbooks SET pdf_url = 'https://rosuchebnik.ru/upload/iblock/geometry_9_pogorelov.pdf' WHERE id = 10;
+UPDATE t_p36022107_gdz_math_rus_lit_his.textbooks SET pdf_url = 'https://rosuchebnik.ru/upload/iblock/algebra_10_kolmogorov.pdf' WHERE id = 11;
+UPDATE t_p36022107_gdz_math_rus_lit_his.textbooks SET pdf_url = 'https://rosuchebnik.ru/upload/iblock/geometry_10-11_atanasyan.pdf' WHERE id = 12;
+UPDATE t_p36022107_gdz_math_rus_lit_his.textbooks SET pdf_url = 'https://rosuchebnik.ru/upload/iblock/algebra_11_kolmogorov.pdf' WHERE id = 13;
+UPDATE t_p36022107_gdz_math_rus_lit_his.textbooks SET pdf_url = 'https://rosuchebnik.ru/upload/iblock/geometry_11_atanasyan.pdf' WHERE id = 14;
+UPDATE t_p36022107_gdz_math_rus_lit_his.textbooks SET pdf_url = 'https://rosuchebnik.ru/upload/iblock/physics_7_peryshkin.pdf' WHERE id = 15;
+UPDATE t_p36022107_gdz_math_rus_lit_his.textbooks SET pdf_url = 'https://rosuchebnik.ru/upload/iblock/physics_8_peryshkin.pdf' WHERE id = 16;
+UPDATE t_p36022107_gdz_math_rus_lit_his.textbooks SET pdf_url = 'https://rosuchebnik.ru/upload/iblock/german_5_bim.pdf' WHERE id = 17;
+UPDATE t_p36022107_gdz_math_rus_lit_his.textbooks SET pdf_url = 'https://rosuchebnik.ru/upload/iblock/finnish_6_saarinen.pdf' WHERE id = 18;
+UPDATE t_p36022107_gdz_math_rus_lit_his.textbooks SET pdf_url = 'https://prosv.ru/umk/spotlight/info/okruzhayushiy_mir_1_pleshakov.pdf' WHERE id = 19;

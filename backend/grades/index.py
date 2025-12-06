@@ -53,7 +53,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             }
         
         elif resource == 'subjects':
-            cursor.execute("SELECT * FROM subjects WHERE id NOT IN (12, 19, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36) ORDER BY name")
+            cursor.execute("SELECT * FROM subjects WHERE id NOT IN (21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37) ORDER BY name")
             subjects = cursor.fetchall()
             
             return {
@@ -61,6 +61,48 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                 'body': json.dumps({
                     'subjects': [dict(subject) for subject in subjects]
+                }, ensure_ascii=False),
+                'isBase64Encoded': False
+            }
+        
+        elif resource == 'textbook_solutions':
+            grade_id = params.get('grade_id')
+            subject_id = params.get('subject_id')
+            textbook_id = params.get('textbook_id')
+            
+            query = """
+                SELECT ts.*, t.title as textbook_title, t.author, g.name as grade_name, s.name as subject_name
+                FROM textbook_solutions ts
+                LEFT JOIN textbooks t ON ts.textbook_id = t.id
+                LEFT JOIN grades g ON ts.grade_id = g.id
+                LEFT JOIN subjects s ON ts.subject_id = s.id
+                WHERE 1=1
+            """
+            
+            if grade_id:
+                query += f" AND ts.grade_id = {int(grade_id)}"
+            if subject_id:
+                query += f" AND ts.subject_id = {int(subject_id)}"
+            if textbook_id:
+                query += f" AND ts.textbook_id = {int(textbook_id)}"
+            
+            query += " ORDER BY ts.page_number, ts.task_number"
+            
+            cursor.execute(query)
+            solutions = cursor.fetchall()
+            
+            result_solutions = []
+            for solution in solutions:
+                sol_dict = dict(solution)
+                if 'created_at' in sol_dict and sol_dict['created_at']:
+                    sol_dict['created_at'] = sol_dict['created_at'].isoformat()
+                result_solutions.append(sol_dict)
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({
+                    'solutions': result_solutions
                 }, ensure_ascii=False),
                 'isBase64Encoded': False
             }

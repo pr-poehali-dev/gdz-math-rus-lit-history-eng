@@ -20,6 +20,22 @@ interface Subject {
   color: string;
 }
 
+interface TextbookSolution {
+  id: number;
+  textbook_id: number;
+  grade_id: number;
+  subject_id: number;
+  page_number: number;
+  task_number: string;
+  task_text: string;
+  solution_text: string;
+  difficulty: string;
+  textbook_title: string;
+  author: string;
+  grade_name: string;
+  subject_name: string;
+}
+
 export default function Index() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,7 +45,9 @@ export default function Index() {
   const [isListening, setIsListening] = useState(false);
   const [grades, setGrades] = useState<Grade[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [textbookSolutions, setTextbookSolutions] = useState<TextbookSolution[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingSolutions, setLoadingSolutions] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -50,6 +68,31 @@ export default function Index() {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (selectedGrade || selectedSubject) {
+      fetchTextbookSolutions();
+    } else {
+      setTextbookSolutions([]);
+    }
+  }, [selectedGrade, selectedSubject]);
+
+  const fetchTextbookSolutions = async () => {
+    setLoadingSolutions(true);
+    try {
+      const params = new URLSearchParams();
+      if (selectedGrade) params.append('grade_id', selectedGrade.toString());
+      if (selectedSubject) params.append('subject_id', selectedSubject.toString());
+      
+      const res = await fetch(`https://functions.poehali.dev/1c946bd1-e639-4d28-a547-ab3c32f5f380/?resource=textbook_solutions&${params.toString()}`);
+      const data = await res.json();
+      setTextbookSolutions(data.solutions || []);
+    } catch (error) {
+      console.error('Error loading solutions:', error);
+    } finally {
+      setLoadingSolutions(false);
+    }
+  };
 
   const handleVoiceSearch = () => {
     if (!('webkitSpeechRecognition' in window)) {
@@ -221,7 +264,7 @@ export default function Index() {
           </div>
 
           {(selectedGrade || selectedSubject || selectedDifficulty || searchQuery) && (
-            <div className="flex gap-2 items-center">
+            <div className="flex gap-2 items-center mb-8">
               <Button onClick={handleSearch} size="lg" className="text-lg">
                 <Icon name="Search" size={20} className="mr-2" />
                 Найти задачи
@@ -239,6 +282,72 @@ export default function Index() {
                 <Icon name="X" size={16} className="mr-1" />
                 Сбросить фильтры
               </Button>
+            </div>
+          )}
+
+          {(selectedGrade || selectedSubject) && (
+            <div className="mb-12">
+              <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                <Icon name="BookOpen" size={28} />
+                Решения из учебников
+              </h3>
+              
+              {loadingSolutions ? (
+                <div className="flex justify-center py-12">
+                  <Icon name="Loader2" size={48} className="animate-spin text-primary" />
+                </div>
+              ) : textbookSolutions.length > 0 ? (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {textbookSolutions
+                    .filter((sol) => !selectedDifficulty || sol.difficulty === selectedDifficulty)
+                    .map((solution) => (
+                    <Card key={solution.id} className="hover:shadow-lg transition-all border-2 hover:border-primary cursor-pointer">
+                      <CardHeader>
+                        <div className="flex items-start justify-between mb-2">
+                          <Badge variant="secondary">{solution.grade_name}</Badge>
+                          <Badge 
+                            variant={
+                              solution.difficulty === 'easy' ? 'default' : 
+                              solution.difficulty === 'medium' ? 'secondary' : 
+                              'destructive'
+                            }
+                          >
+                            {solution.difficulty === 'easy' ? 'Лёгкий' : 
+                             solution.difficulty === 'medium' ? 'Средний' : 
+                             'Сложный'}
+                          </Badge>
+                        </div>
+                        <CardTitle className="text-lg">
+                          {solution.task_number} (стр. {solution.page_number})
+                        </CardTitle>
+                        <CardDescription className="text-sm">
+                          <div className="font-semibold mb-1">{solution.textbook_title}</div>
+                          <div className="text-xs">{solution.author}</div>
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          <div>
+                            <div className="font-semibold text-sm mb-1">Задание:</div>
+                            <div className="text-sm text-muted-foreground">{solution.task_text}</div>
+                          </div>
+                          <div>
+                            <div className="font-semibold text-sm mb-1">Решение:</div>
+                            <div className="text-sm">{solution.solution_text}</div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card className="text-center py-8">
+                  <CardContent>
+                    <Icon name="BookOpen" size={48} className="mx-auto mb-3 text-muted-foreground opacity-20" />
+                    <p className="text-muted-foreground">По выбранным фильтрам решений пока нет</p>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           )}
         </div>

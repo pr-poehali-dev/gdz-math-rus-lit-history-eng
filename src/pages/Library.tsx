@@ -13,6 +13,7 @@ interface Textbook {
   author: string;
   publisher: string;
   year: number;
+  pdf_url?: string;
   grade_name?: string;
   subject_name?: string;
   subject_icon?: string;
@@ -227,13 +228,22 @@ export default function Library() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex gap-2">
-                    <Button className="flex-1" size="sm">
+                    <Button className="flex-1" size="sm" onClick={() => navigate(`/library/${textbook.id}`)}>
                       <Icon name="BookOpen" size={14} className="mr-1" />
                       Открыть
                     </Button>
-                    <Button variant="outline" size="sm">
-                      <Icon name="Download" size={14} />
-                    </Button>
+                    {textbook.pdf_url && (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(textbook.pdf_url, '_blank');
+                        }}
+                      >
+                        <Icon name="Download" size={14} />
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
